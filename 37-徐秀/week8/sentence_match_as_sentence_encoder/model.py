@@ -25,7 +25,8 @@ class SentenceEncoder(nn.Module):
         pretrain_model_path = config["pretrain_model_path"]
         self.bert_encoder = BertModel.from_pretrained(pretrain_model_path, return_dict=False)
 
-        self.layer = nn.Linear(hidden_size*6, hidden_size)
+        # self.layer = nn.Linear(hidden_size*6, hidden_size)
+        self.layer = nn.Linear(self.bert_encoder.config.hidden_size, hidden_size)  # 修改与bert一致
         self.dropout = nn.Dropout(0.5)
 
     # 输入为问题字符编码
