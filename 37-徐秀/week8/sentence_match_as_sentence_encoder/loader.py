@@ -7,6 +7,7 @@ import torch
 import random
 import jieba
 import numpy as np
+from transformers import AutoTokenizer
 from torch.utils.data import Dataset, DataLoader
 from collections import defaultdict
 
@@ -19,9 +20,13 @@ class DataGenerator:
     def __init__(self, data_path, config):
         self.config = config
         self.path = data_path
-        self.vocab = load_vocab(config["vocab_path"])
-        self.config["vocab_size"] = len(self.vocab)
+        # self.vocab = load_vocab(config["vocab_path"])
+        self.tokenizer = AutoTokenizer.from_pretrained(config["pretrain_model_path"],
+                                                       add_special_tokens=True)
+        # self.config["vocab_size"] = len(self.vocab)
+        self.config["vocab_size"] = self.tokenizer.vocab_size
         self.schema = load_schema(config["schema_path"])
+        self.max_length = config["max_length"]
         self.train_data_size = config["epoch_data_size"]  # 由于采取随机采样，所以需要设定一个采样数量，否则可以一直采
         self.data_type = None  # 用来标识加载的是训练集还是测试集 "train" or "test"
         self.load()
@@ -53,15 +58,20 @@ class DataGenerator:
         return
 
     def encode_sentence(self, text):
-        input_id = []
-        if self.config["vocab_path"] == "words.txt":
-            for word in jieba.cut(text):
-                input_id.append(self.vocab.get(word, self.vocab["[UNK]"]))
-        else:
-            for char in text:
-                input_id.append(self.vocab.get(char, self.vocab["[UNK]"]))
-        input_id = self.padding(input_id)
-        return input_id
+        # input_id = []
+        # if self.config["vocab_path"] == "words.txt":
+        #     for word in jieba.cut(text):
+        #         input_id.append(self.vocab.get(word, self.vocab["[UNK]"]))
+        # else:
+        #     for char in text:
+        #         input_id.append(self.vocab.get(char, self.vocab["[UNK]"]))
+        # input_id = self.padding(input_id)
+        encode = self.tokenizer.encode(text,
+                                       max_length=self.max_length,
+                                       pad_to_max_length=True,  # 句子后面添加pad到最大长度
+                                       # add_special_tokens=True  # add_special_tokens False不添加cls和sep token,默认True
+                                       )
+        return encode
 
     # 补齐或截断输入的序列，使其可以在一个batch内运算
     def padding(self, input_id):
