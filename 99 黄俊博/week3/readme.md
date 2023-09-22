@@ -1,3 +1,4 @@
+
 nlpdemo变成rnn实现
 
 + 
@@ -7,4 +8,4 @@ nlpdemo变成rnn实现
 
   y 真实值也要， ？
 
-  
+
