@@ -55,7 +55,7 @@ class DataGenerator:
             input_id = self.padding(input_id)
         return input_id
 
-    #补齐或截断输入的序列，使其可以在一个batch内运算
+    # 补齐或截断输入的序列，使其可以在一个batch内运算
     def padding(self, input_id, pad_token=0):
         input_id = input_id[:self.config["max_length"]]
         input_id += [pad_token] * (self.config["max_length"] - len(input_id))
@@ -71,24 +71,25 @@ class DataGenerator:
         with open(path, encoding="utf8") as f:
             return json.load(f)
 
-#加载字表或词表
+
+# 加载字表或词表
 def load_vocab(vocab_path):
     token_dict = {}
     with open(vocab_path, encoding="utf8") as f:
         for index, line in enumerate(f):
             token = line.strip()
-            token_dict[token] = index + 1  #0留给padding位置，所以从1开始
+            token_dict[token] = index + 1  # 0留给padding位置，所以从1开始
     return token_dict
 
-#用torch自带的DataLoader类封装数据
+
+# 用torch自带的DataLoader类封装数据
 def load_data(data_path, config, shuffle=True):
     dg = DataGenerator(data_path, config)
     dl = DataLoader(dg, batch_size=config["batch_size"], shuffle=shuffle)
     return dl
 
 
-
 if __name__ == "__main__":
     from config import Config
-    dg = DataGenerator("../ner_data/train.txt", Config)
 
+    dg = DataGenerator("../ner_data/train.txt", Config)

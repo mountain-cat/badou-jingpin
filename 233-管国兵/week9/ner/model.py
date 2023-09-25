@@ -4,9 +4,12 @@ import torch
 import torch.nn as nn
 from torch.optim import Adam, SGD
 from TorchCRF import CRF
+from transformers import BertModel
+
 """
 建立网络模型结构
 """
+
 
 class TorchModel(nn.Module):
     def __init__(self, config):
@@ -18,6 +21,8 @@ class TorchModel(nn.Module):
         num_layers = config["num_layers"]
         self.embedding = nn.Embedding(vocab_size, hidden_size, padding_idx=0)
         self.layer = nn.LSTM(hidden_size, hidden_size, batch_first=True, bidirectional=True, num_layers=num_layers)
+
+        self.bert = BertModel.from_pretrained(config['pre_train_model_path'], return_dict=False)
         self.classify = nn.Linear(hidden_size * 2, class_num)
 
         """
@@ -30,20 +35,20 @@ class TorchModel(nn.Module):
         """
         self.crf_layer = CRF(class_num, batch_first=True)
         self.use_crf = config["use_crf"]
-        self.loss = torch.nn.CrossEntropyLoss(ignore_index=-1)  #loss采用交叉熵损失
+        self.loss = torch.nn.CrossEntropyLoss(ignore_index=-1)  # loss采用交叉熵损失
 
-    #当输入真实标签，返回loss值；无真实标签，返回预测值
+    # 当输入真实标签，返回loss值；无真实标签，返回预测值
     def forward(self, x, target=None):
-        x = self.embedding(x)  #input shape:(batch_size, sen_len)
-        x, _ = self.layer(x)      #input shape:(batch_size, sen_len, input_dim)
-        predict = self.classify(x) #ouput:(batch_size, sen_len, num_tags) -> (batch_size * sen_len, num_tags)
+        x = self.embedding(x)  # input shape:(batch_size, sen_len)
+        x, _ = self.layer(x)  # input shape:(batch_size, sen_len, input_dim)
+        predict = self.classify(x)  # ouput:(batch_size, sen_len, num_tags) -> (batch_size * sen_len, num_tags)
 
         if target is not None:
             if self.use_crf:
                 mask = target.gt(-1)
-                return - self.crf_layer(predict, target, mask, reduction="mean") # eg：112.15607452392578
+                return - self.crf_layer(predict, target, mask, reduction="mean")  # eg：112.15607452392578
             else:
-                #(number, class_num), (number)
+                # (number, class_num), (number)
                 return self.loss(predict.view(-1, predict.shape[-1]), target.view(-1))
         else:
             if self.use_crf:
@@ -63,4 +68,5 @@ def choose_optimizer(config, model):
 
 if __name__ == "__main__":
     from config import Config
+
     model = TorchModel(Config)
