@@ -20,21 +20,23 @@ class TorchModel(nn.Module):
     def __init__(self, vector_dim, sentence_length, vocab):
         super(TorchModel, self).__init__()
         self.embedding = nn.Embedding(len(vocab), vector_dim)  # embedding层
-        self.pool = nn.AvgPool1d(sentence_length)  # 池化层
-        self.classify = nn.RNN(vector_dim, 1, batch_first=True)
-        self.activation = torch.sigmoid  # sigmoid归一化函数
-        self.loss = nn.functional.mse_loss  # loss函数采用均方差损失
+        # self.pool = nn.AvgPool1d(sentence_length)  # 池化层
+        self.rnn = nn.RNN(num_layers=1, input_size=vector_dim, hidden_size=vector_dim, batch_first=True)
+        self.layer = nn.Linear(vector_dim, 3)
+        # self.activation = torch.sigmoid  # sigmoid归一化函数
+        # self.loss = nn.functional.mse_loss  # loss函数采用均方差损失
+        self.loss = nn.functional.cross_entropy
 
     # 当输入真实标签，返回loss值；无真实标签，返回预测值
     def forward(self, x, y=None):
         x = self.embedding(x)  # (batch_size, sen_len) -> (batch_size, sen_len, vector_dim)
-        x = x.transpose(1, 2)  # (batch_size, sen_len, vector_dim) -> (batch_size, vector_dim, sen_len)
-        x = self.pool(x)  # (batch_size, vector_dim, sen_len)->(batch_size, vector_dim, 1)
-        x = x.squeeze()  # (batch_size, vector_dim, 1) -> (batch_size, vector_dim)
-        x = self.classify(x)[0]  # (batch_size, vector_dim) -> (batch_size, 1)
-        y_pred = self.activation(x)  # (batch_size, 1) -> (batch_size, 1)
+        # x = x.transpose(1, 2)  # (batch_size, sen_len, vector_dim) -> (batch_size, vector_dim, sen_len)
+        # x = self.pool(x)  # (batch_size, vector_dim, sen_len)->(batch_size, vector_dim, 1)
+        # x = x.squeeze()  # (batch_size, vector_dim, 1) -> (batch_size, vector_dim)
+        _, x = self.rnn(x)  # (batch_size, vector_dim) -> (batch_size, 1)
+        y_pred = self.layer(x.squeeze())  # (batch_size, 1) -> (batch_size, 1)
         if y is not None:
-            return self.loss(y_pred, y)  # 预测值和真实值计算损失
+            return self.loss(y_pred, y.squeeze())  # 预测值和真实值计算损失
         else:
             return y_pred  # 输出预测结果
 
@@ -61,6 +63,9 @@ def build_sample(vocab, sentence_length):
     # 指定哪些字出现时为正样本
     if set("abc") & set(x):
         y = 1
+    # 指定哪些字出现时为正样本
+    elif set("xyz") & set(x):
+        y = 2
     # 指定字都未出现，则为负样本
     else:
         y = 0
@@ -77,7 +82,7 @@ def build_dataset(sample_length, vocab, sentence_length):
         x, y = build_sample(vocab, sentence_length)
         dataset_x.append(x)
         dataset_y.append([y])
-    return torch.LongTensor(dataset_x), torch.FloatTensor(dataset_y)
+    return torch.LongTensor(dataset_x), torch.LongTensor(dataset_y)
 
 
 # 建立模型
@@ -95,13 +100,16 @@ def evaluate(model, vocab, sample_length):
     correct, wrong = 0, 0
     with torch.no_grad():
         y_pred = model(x)  # 模型预测
-        for y_p, y_t in zip(y_pred, y):  # 与真实标签进行对比
-            if float(y_p) < 0.5 and int(y_t) == 0:
-                correct += 1  # 负样本判断正确
-            elif float(y_p) >= 0.5 and int(y_t) == 1:
-                correct += 1  # 正样本判断正确
-            else:
-                wrong += 1
+        y_pred = torch.argmax(y_pred, dim=-1)
+        correct += int(sum(y_pred == y.squeeze()))
+        wrong += len(y) - correct
+        # for y_p, y_t in zip(y_pred, y):  # 与真实标签进行对比
+        #     if float(y_p) < 0.5 and int(y_t) == 0:
+        #         correct += 1  # 负样本判断正确
+        #     elif float(y_p) >= 0.5 and int(y_t) == 1:
+        #         correct += 1  # 正样本判断正确
+        #     else:
+        #         wrong += 1
     print("正确预测个数：%d, 正确率：%f" % (correct, correct / (correct + wrong)))
     return correct / (correct + wrong)
 
@@ -163,7 +171,7 @@ def predict(model_path, vocab_path, input_strings):
     with torch.no_grad():  # 不计算梯度
         result = model.forward(torch.LongTensor(x))  # 模型预测
     for i, input_string in enumerate(input_strings):
-        print("输入：%s, 预测类别：%d, 概率值：%f" % (input_string, round(float(result[i])), result[i]))  # 打印结果
+        print("输入：%s, 预测类别：%d, 概率值：%s" % (input_string, int(torch.argmax(result[i])), result[i]))  # 打印结果
 
 
 if __name__ == "__main__":
