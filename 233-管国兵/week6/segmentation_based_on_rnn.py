@@ -22,7 +22,7 @@ char_dim = 768  # 每个字的维度
 class TorchModel(nn.Module):
     def __init__(self, input_dim):
         super(TorchModel, self).__init__()
-        self.bert = BertModel.from_pretrained(r"D:\AiModels\bert-base-chinese", return_dict=False)
+        self.bert = BertModel.from_pretrained(r"F:\AiModels\bert-base-chinese", return_dict=False)
         self.classify = nn.Linear(input_dim, 2)
         self.activation = torch.sigmoid  # sigmoid做激活函数
         self.dropout = nn.Dropout(0.5)
@@ -176,18 +176,14 @@ def predict(model_path, vocab_path, input_strings):
 if __name__ == "__main__":
     main()
     """
-    loss不降
-    第 5 轮, 第 69 次，loss =  tensor(0.6719, grad_fn=<NllLossBackward0>)
-第 5 轮, 第 70 次，loss =  tensor(0.6791, grad_fn=<NllLossBackward0>)
-第 5 轮, 第 71 次，loss =  tensor(0.6779, grad_fn=<NllLossBackward0>)
-第 5 轮, 第 72 次，loss =  tensor(0.6822, grad_fn=<NllLossBackward0>)
-第 5 轮, 第 73 次，loss =  tensor(0.6794, grad_fn=<NllLossBackward0>)
-第 5 轮, 第 74 次，loss =  tensor(0.6876, grad_fn=<NllLossBackward0>)
-第 5 轮, 第 75 次，loss =  tensor(0.6933, grad_fn=<NllLossBackward0>)
-第 5 轮, 第 76 次，loss =  tensor(0.6818, grad_fn=<NllLossBackward0>)
-第 5 轮, 第 77 次，loss =  tensor(0.6736, grad_fn=<NllLossBackward0>)
-第 5 轮, 第 78 次，loss =  tensor(0.6837, grad_fn=<NllLossBackward0>)
-第 5 轮, 第 79 次，loss =  tensor(0.6775, grad_fn=<NllLossBackward0>)
+    loss记录
+第 0 轮, 第 138 次，loss =  tensor(0.4179, grad_fn=<NllLossBackward0>)
+第 0 轮, 第 139 次，loss =  tensor(0.4035, grad_fn=<NllLossBackward0>)
+第 0 轮, 第 140 次，loss =  tensor(0.4275, grad_fn=<NllLossBackward0>)
+第 0 轮, 第 141 次，loss =  tensor(0.4658, grad_fn=<NllLossBackward0>)
+第 0 轮, 第 142 次，loss =  tensor(0.4484, grad_fn=<NllLossBackward0>)
+第 0 轮, 第 143 次，loss =  tensor(0.4463, grad_fn=<NllLossBackward0>)
+第 0 轮, 第 144 次，loss =  tensor(0.4304, grad_fn=<NllLossBackward0>)
     """
     input_strings = ["同时国内有望出台新汽车刺激方案",
                      "沪胶后市有望延续强势",
