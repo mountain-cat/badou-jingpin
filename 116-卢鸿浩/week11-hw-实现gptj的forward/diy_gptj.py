@@ -37,6 +37,8 @@ class DiyGptj:
         self.hidden_size = 768
         self.num_layers = 1
         self.load_weights(state_dict)
+        self.output_layer_norm_w = np.random.rand(self.hidden_size)
+        self.output_layer_norm_b = np.random.rand(self.hidden_size)
         
     # copyed
     def load_weights(self, state_dict):
@@ -79,13 +81,14 @@ class DiyGptj:
         pe = self.get_embedding(self.word_embeddings, np.array(list(range(len(x))))) # ->shape: 同上
         print("position embedding:")
         print(pe)
+        print(self.embeddings_layer_norm_weight.shape)
         
         # token embedding单输入的情况下为[0, 0, 0, 0]
         te = self.get_embedding(self.word_embeddings, np.array([0]*len(x))) # ->shape: 同上
         embedding = we + pe + te
         embedding = self.layer_norm(embedding, self.embeddings_layer_norm_weight, self.embeddings_layer_norm_bias)
         return embedding
-    
+
     def get_embedding(self, embedding_matrix, x):
         # 找到输入x中每一个值在embedding_matrix中的对应的向量
         # shape: max_len -> [male_len, hidden_size]
@@ -96,7 +99,7 @@ class DiyGptj:
         for i in range(self.num_layers):
             x = self.single_gptj_layer_forward(x, i)
         return x
-    
+
     # 执行单层的transformer
     def single_gptj_layer_forward(self, x, layer_index):
         weights = self.transformer_weights[layer_index]
@@ -108,7 +111,7 @@ class DiyGptj:
         intermediate_weight, intermediate_bias, \
         output_weight, output_bias, \
         ff_layer_norm_w, ff_layer_norm_b = weights
-        
+
         attention_output = self.self_attention(x,
                                                q_w, q_b,
                                                k_w, k_b,
@@ -117,14 +120,15 @@ class DiyGptj:
                                                self.num_attention_heads,
                                                self.hidden_size
                                                )
-        
+
         feed_forward_x = self.feed_forward(x,    
                         intermediate_weight,
                         intermediate_bias,
                         output_weight,
                         output_bias,)
         
-        # x = self.layer_norm(x+attention_output+feed_forward_x, output_layer_norm_w, output_layer_norm_b)
+        # GPTJ结构
+        x = self.layer_norm(x + attention_output + feed_forward_x, self.output_layer_norm_w, self.output_layer_norm_b)
         return x
 
     # self_attention计算
@@ -160,7 +164,7 @@ class DiyGptj:
         attention = np.dot(qkv, attention_output_weight.T) + attention_output_bias
         print(attention)
         return attention
-    
+
     #多头机制
     def transpose_for_scores(self, x, attention_head_size, num_attention_heads):
         max_len, hidden_size = x.shape
@@ -182,7 +186,7 @@ class DiyGptj:
         # ->shape: [max_len, hidden_size]
         x = np.dot(x, output_weight.T) + output_bias
         return x
-    
+
     def pooler_output_layer(self,x):
         x = np.dot(x, self.pooler_dense_weight.T) + self.pooler_dense_bias
         x = np.tanh(x)  # 映射到(-1,1)
@@ -191,18 +195,18 @@ class DiyGptj:
     # MSE 归一化
     def layer_norm(self, x, w, b):
         # w shape:
-        
+
         # x shape: [max_len, hidden_size]
         # 需要按第二维（hidden_size）归一化，与第一维（max_len）无关
         x = (x - np.mean(x, axis=1, keepdims = True)) / np.std(x, axis = 1, keepdims = True)
         print(x.shape)
         print(w.shape)
-        x = x*w + b  # 点乘，对位相乘
+        x = np.multiply(x, w) + b  # 点乘，对位相乘
         return x
-        
+
     def forward(self, x):
         x = self.embedding_forward(x)
-        
+
         sequence_output = self.all_gptj_layer_forward(x)
         pooler_output = self.pooler_output_layer(sequence_output[0])  ##??
         return sequence_output, pooler_output
