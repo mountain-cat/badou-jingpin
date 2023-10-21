@@ -49,14 +49,20 @@ class DAGDecode:
 #对于每一个序列，如果已经解码完毕，则直接添加到finish_path, 如果没有解码完毕，则放到待解码队列
     def decode_next(self, path):
         path_length = len("".join(path))
+        print("1111111111")
+        print(path_length)
         if path_length == self.length:
             self.finish_path.append(path)
+            print("222222222")
+            print(self.finish_path)
             return
         candidates = self.DAG[path_length]
         new_path=[]
         for candidate in candidates:
             new_path.append(path+[self.sentence[path_length:candidate+1]])
         self.unfinish_path += new_path
+        print("333333333333")
+        print(self.unfinish_path)
         return
 #递归调用序列解码
     def decode(self):
