@@ -6,6 +6,8 @@ from transformers import BertModel
 ###
 
 #通过手动矩阵运算实现GPTJ结构
+#相比bert的主要区别是，这里计算attention和forward之后，和原始输入相加，送入归一化层
+#手动敲了一下整个流程，理解更加透彻了
 
 ###
 
