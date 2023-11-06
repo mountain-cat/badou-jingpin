@@ -1,0 +1,22 @@
+正负样本数量大约为1：2，将正样本重采样，重采样后正负比例约为1：1，样本平均长度约为：25
+训练集：测试集 = 7：3 约等于 11200：4800
+最高准确率：0.9076506149676882预测用时：0.5745913982391357
+实验配置：{'model_type': 'fast_text', 'max_length': 25, 'test_size': 0.3, 'hidden_size': 256, 'kernel_size': 3, 'num_layers': 2, 'epoch': 20, 'batch_size': 64, 'pooling_style': 'avg', 'optimizer': 'adam', 'learning_rate': 0.001, 'class_num': 2, 'vocab_size': 4622}
+最高准确率：0.9093183239524703预测用时：0.703693151473999
+实验配置：{'model_type': 'lstm', 'max_length': 25, 'test_size': 0.3, 'hidden_size': 256, 'kernel_size': 3, 'num_layers': 2, 'epoch': 20, 'batch_size': 64, 'pooling_style': 'avg', 'optimizer': 'adam', 'learning_rate': 0.001, 'class_num': 2, 'vocab_size': 4622}
+最高准确率：0.9034813425057328预测用时：0.7206144332885742
+实验配置：{'model_type': 'gru', 'max_length': 25, 'test_size': 0.3, 'hidden_size': 256, 'kernel_size': 3, 'num_layers': 2, 'epoch': 20, 'batch_size': 64, 'pooling_style': 'avg', 'optimizer': 'adam', 'learning_rate': 0.001, 'class_num': 2, 'vocab_size': 4622}
+最高准确率：0.892432770481551预测用时：0.6382105350494385
+实验配置：{'model_type': 'rnn', 'max_length': 25, 'test_size': 0.3, 'hidden_size': 256, 'kernel_size': 3, 'num_layers': 2, 'epoch': 20, 'batch_size': 64, 'pooling_style': 'avg', 'optimizer': 'adam', 'learning_rate': 0.001, 'class_num': 2, 'vocab_size': 4622}
+最高准确率：0.9093183239524703预测用时：0.6466617584228516
+实验配置：{'model_type': 'cnn', 'max_length': 25, 'test_size': 0.3, 'hidden_size': 256, 'kernel_size': 3, 'num_layers': 2, 'epoch': 20, 'batch_size': 64, 'pooling_style': 'avg', 'optimizer': 'adam', 'learning_rate': 0.001, 'class_num': 2, 'vocab_size': 4622}
+最高准确率：0.9693558474046279预测用时：0.6465706825256348
+实验配置：{'model_type': 'gated_cnn', 'max_length': 25, 'test_size': 0.3, 'hidden_size': 256, 'kernel_size': 3, 'num_layers': 2, 'epoch': 20, 'batch_size': 64, 'pooling_style': 'avg', 'optimizer': 'adam', 'learning_rate': 0.001, 'class_num': 2, 'vocab_size': 4622}
+最高准确率：0.9747759016051699预测用时：0.6772150993347168
+实验配置：{'model_type': 'stack_gated_cnn', 'max_length': 25, 'test_size': 0.3, 'hidden_size': 256, 'kernel_size': 3, 'num_layers': 2, 'epoch': 20, 'batch_size': 64, 'pooling_style': 'avg', 'optimizer': 'adam', 'learning_rate': 0.001, 'class_num': 2, 'vocab_size': 4622}
+最高准确率：0.968313529289139预测用时：0.656801700592041
+实验配置：{'model_type': 'rcnn', 'max_length': 25, 'test_size': 0.3, 'hidden_size': 256, 'kernel_size': 3, 'num_layers': 2, 'epoch': 20, 'batch_size': 64, 'pooling_style': 'avg', 'optimizer': 'adam', 'learning_rate': 0.001, 'class_num': 2, 'vocab_size': 4622}
+最高准确率：0.9505941213258287预测用时：0.8420395851135254
+实验配置：{'model_type': 'bert', 'max_length': 25, 'test_size': 0.3, 'hidden_size': 256, 'kernel_size': 3, 'num_layers': 2, 'epoch': 20, 'batch_size': 64, 'pooling_style': 'avg', 'optimizer': 'adam', 'learning_rate': 0.001, 'class_num': 2, 'vocab_size': 4622}
+（bert:num_hidden_layers = 1）
+（注：预测用时为模型预测约4800个样本总用时）
